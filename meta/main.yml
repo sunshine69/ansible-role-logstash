@@ -54,4 +54,4 @@ galaxy_info:
 
 dependencies:
   - { role: xvt-pip }
-  - { role: dpe.java, when: "deployment_type != 'docker'" }
+  - { role: xvt-java, when: "deployment_type != 'docker'" }
