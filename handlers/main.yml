@@ -1,0 +1,17 @@
+- name: Restart docker
+  service:
+    name: docker
+    state: restarted
+
+- name: reload systemd
+  command: systemctl daemon-reload
+
+- name: reload logstash
+  command: pkill -U logstash -HUP -f /etc/logstash
+  when: deployment_type == "deb"
+
+- name: restart logstash
+  service:
+    name: logstash
+    state: restarted
+  when: deployment_type == "deb"

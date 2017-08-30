@@ -1,0 +1,57 @@
+# logstash sits in central vpc
+- block:
+    - name: Get the VPC facts for all VPC
+      ec2_vpc_net_facts:
+        region: "{{ region }}"
+        profile: "{{ aws_account_name }}"
+        filters:
+          "tag:Name": "xvt-vpc*"
+      register: vpc_facts
+
+    - name: Set fact for vpc_facts_list
+      set_fact:
+        vpc_facts_list: "{{ vpc_facts.vpcs }}"
+
+    - debug:
+        msg: "{{ vpc_facts_list | map(attribute='id') | list }} - logstash_domain '{{ logstash_domain }}'"
+        verbosity: 2
+
+    - name: Create environment internal Route53 zone
+      route53_zone:
+        zone: "{{ logstash_domain }}"
+        vpc_id: "{{ vpc_facts_list | map(attribute='id') | list }}"
+        vpc_region: "{{ region }}"
+        comment: "Private hosted zone for {{ logstash_domain }}"
+        state: present
+        profile: "{{ aws_account_name }}"
+      register: environment_internal_zone_result
+
+    - debug:
+        msg: "{{ environment_internal_zone_result.set|default({}) }}"
+        verbosity: 2
+
+    - name: Create Route53 DNS for {{ logstash_node_name }}
+      route53:
+        profile: "{{ aws_account_name|default(omit) }}"
+        private_zone: true
+        type: A
+        zone: "{{ logstash_domain }}"
+        record: "{{ logstash_endpoint_list[logstash_node_name] }}"
+        command: create
+        value: "{{ ec2_instance.private_ip_address|default(ec2_instance.private_ip) }}"
+        overwrite: true
+
+    - name: Create Route53 Public DNS for {{ logstash_node_name }}
+      route53:
+        profile: "xvt_aws"
+        private_zone: false
+        type: A
+        zone: "xvt.technology"
+        record: "logstash-{{ logstash_node_name|replace('_','-') }}-{{ central_name }}.xvt.technology"
+        command: create
+        value: "{{ ec2_instance.public_ip_address|default(ec2_instance.public_ip) }}"
+        overwrite: true
+      when: ec2_instance_is_public
+
+  connection: local
+  become: no

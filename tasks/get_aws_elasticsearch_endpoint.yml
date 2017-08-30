@@ -1,0 +1,17 @@
+- debug:
+    msg: "elasticsearch_endpoint - {{elasticsearch_endpoint}}, aws_elasticsearch_name - {{aws_elasticsearch_name}}"
+
+- block:
+    - name: Get elasticsearch fact
+      aws_elasticsearch_facts:
+        region: "{{ region }}"
+        profile: "{{ elasticsearch[elasticsearch_key].aws_account_name }}"
+        domain_name: "{{ elasticsearch[elasticsearch_key].name }}"
+      register: elasticsearch_facts_out
+      connection: local
+      become: no
+
+    - name: Set fact elasticsearch_endpoint to be used in logstash.conf template
+      set_fact:
+        elasticsearch_endpoint: "https://{{ elasticsearch_facts_out.result.DomainStatus.Endpoint }}"
+  when: not elasticsearch_endpoint and aws_elasticsearch_name

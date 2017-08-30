@@ -1,0 +1,2 @@
+ELB_ACCESS_LOG %{TIMESTAMP_ISO8601:timestamp} %{NOTSPACE:loadbalancer} %{IP:clientip}:%{INT:clientport:int} (?:(%{IP:backendip}:?:%{INT:backendport:int})|-) %{NUMBER:request_processing_time:float} %{NUMBER:backend_processing_time:float} %{NUMBER:response_processing_time:float} (?:%{INT:status:int}|-) (?:%{INT:backend_response:int}|-) %{INT:received_bytes:int} %{INT:bytes:int} "%{ELB_REQUEST_LINE}" "(?<agent>[^"]*)" %{NOTSPACE:ssl_cipher} %{NOTSPACE:ssl_protocol}
+ALB_ACCESS_LOG %{WORD:protocol} %{ELB_ACCESS_LOG} %{NOTSPACE:target_group_arn} "%{NOTSPACE:trace_id}"

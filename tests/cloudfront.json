@@ -1,0 +1,47 @@
+{
+  "fields": {
+    "filename": "cloudfront/uat/ERZ9CEIGTNPT.2017-06-14-06.1556dbb2.gz",
+    "type": "http"
+  },
+  "ignore": [
+    "filename",
+    "host",
+    "message",
+    "timestamp"
+  ],
+  "testcases": [
+    {
+      "input": [
+        "2017-06-14\t06:43:51\tSYD1\t12219\t14.201.234.178\tGET\tdjyuyjj2iisqq.cloudfront.net\t/sites/default/files//css/css__QB_h_iaiAFYOUbI6mLc01Da7ZdbDWTWGwXuYrsEJb0.css\t200\thttp://uat.planningportal.nsw.gov.au/\tMozilla/5.0%2520(Macintosh;%2520Intel%2520Mac%2520OS%2520X%252010_12_5)%2520AppleWebKit/537.36%2520(KHTML,%2520like%2520Gecko)%2520Chrome/58.0.3029.110%2520Safari/537.36\toriuto\t-\tMiss\tb9EMdh6TRK127Mu0eK4eRNL_YXwX-duCgf7A4LydycUorq6EC0DB7A==\tuat.planningportal.nsw.gov.au\thttp\t607\t0.047\t-\t-\t-\tMiss\tHTTP/1.1"
+      ],
+      "expected": [
+        {
+          "@timestamp": "2017-06-14T06:43:51.000Z",
+          "agent": "Mozilla/5.0%2520(Macintosh;%2520Intel%2520Mac%2520OS%2520X%252010_12_5)%2520AppleWebKit/537.36%2520(KHTML,%2520like%2520Gecko)%2520Chrome/58.0.3029.110%2520Safari/537.36",
+          "bytes": 12219,
+          "cache_response_result": "Miss",
+          "cache_result": "Miss",
+          "clientip": "14.201.234.178",
+          "cookies": "oriuto",
+          "edge_location": "SYD1",
+          "environment": "uat",
+          "httpversion": "1.1",
+          "method": "GET",
+          "path": "/sites/default/files//css/css__QB_h_iaiAFYOUbI6mLc01Da7ZdbDWTWGwXuYrsEJb0.css",
+          "protocol": "http",
+          "query": "-",
+          "received_bytes": 607,
+          "referrer": "http://uat.planningportal.nsw.gov.au/",
+          "request_id": "b9EMdh6TRK127Mu0eK4eRNL_YXwX-duCgf7A4LydycUorq6EC0DB7A==",
+          "response_time": 0.047,
+          "ssl_cipher": "-",
+          "ssl_protocol": "-",
+          "status": 200,
+          "type": "cloudfront",
+          "urihost": "djyuyjj2iisqq.cloudfront.net",
+          "x_forwarded_for": "-"
+        }
+      ]
+    }
+  ]
+}

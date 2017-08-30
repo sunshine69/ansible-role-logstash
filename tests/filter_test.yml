@@ -1,0 +1,30 @@
+- hosts: localhost
+
+  tasks:
+    - name: create filters configuration file
+      template:
+        src: ../templates/snippets/filters.conf.j2
+        dest: ./filters.conf
+
+    - name: ensure patterns directory exists
+      file:
+        state: directory
+        path: patterns
+
+    - name: put patterns into place
+      copy:
+        src: ../files/patterns
+        dest: .
+
+    - name: run logstash-filter-verifier
+      command: logstash-filter-verifier --logstash-path {{ logstash_path }} {{ item }} ./filters.conf
+      with_fileglob: "{{ filter|default('*') }}.json"
+      register: test_results
+      ignore_errors: yes
+
+    - name: pretty print any failing test and then fail
+      debug:
+        var: item.stderr_lines
+      with_items: "{{ test_results.results }}"
+      when: item.failed|default(False)
+      failed_when: item.failed|default(False)

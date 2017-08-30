@@ -1,0 +1,48 @@
+{
+  "fields": {
+    "type": "drupal-error"
+  },
+  "ignore": [
+    "host",
+    "message",
+    "timestamp"
+  ],
+  "testcases": [
+    {
+      "input": [
+        "[Tue Jun 06 00:12:55.761578 2017] [proxy_fcgi:error] [pid 1250:tid 139628908635904] [client 10.40.17.89:1649] AH01079: failed to make connection to backend: 127.0.0.1"
+      ],
+      "expected": [
+        {
+          "@timestamp": "2017-06-06T00:12:55.761Z",
+          "clienthost": "10.40.17.89",
+          "clientport": 1649,
+          "php_error_code": "AH01079",
+          "php_error_msg": "failed to make connection to backend: 127.0.0.1",
+          "pid": 1250,
+          "process": "proxy_fcgi",
+          "tid": 139628908635904,
+          "type": "drupal-error"
+        }
+      ]
+    },
+    {
+      "input": [
+        "[Tue Jun 06 00:12:55.763178 2017] [proxy:error] [pid 1250:tid 139628891850496] (111)Connection refused: AH00957: FCGI: attempt to connect to 127.0.0.1:9000 (127.0.0.1) failed"
+      ],
+      "expected": [
+        {
+          "@timestamp": "2017-06-06T00:12:55.763Z",
+          "php_error_code": "AH00957",
+          "php_error_msg": "FCGI: attempt to connect to 127.0.0.1:9000 (127.0.0.1) failed",
+          "pid": 1250,
+          "process": "proxy",
+          "proxy_error_code": 111,
+          "proxy_error_msg": "Connection refused",
+          "tid": 139628891850496,
+          "type": "drupal-error"
+        }
+      ]
+    }
+  ]
+}

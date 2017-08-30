@@ -1,0 +1,132 @@
+  ## IMPORTANT REMINDER
+  # If you create more indices into elastic search by adding in here then you
+  # need to update the python script for lambda execution as well to retire these
+  # indices and maybe - optimization strategies for your new indices.
+  # elasticsearch-lambda-handler-dpe-eplanning.py in template folder.
+
+  if [type] == "drupal-error" {
+    elasticsearch {
+      hosts => ["{{ elasticsearch_endpoint }}"]
+      index => "%{environment}-drupal-error-%{+YYYY.MM.dd}"
+    }
+  }
+
+  else if [type] == "cloudwatch" {
+    elasticsearch {
+      hosts => ["{{ elasticsearch_endpoint }}"]
+      index => "%{environment}-cloudwatch-%{+YYYY.MM.dd}"
+    }
+  }
+
+  else if [type] == "cloudfront" {
+    elasticsearch {
+      hosts => ["{{ elasticsearch_endpoint }}"]
+      index => "%{environment}-cloudfront-%{+YYYY.MM.dd}"
+    }
+  }
+
+  else if [type] == "cloudtrail" {
+    elasticsearch {
+      hosts => ["{{ elasticsearch_endpoint }}"]
+      index => "cloudtrail-%{+YYYY.MM.dd}"
+    }
+  }
+
+  else if [type] == "syslog" and [environment] {
+    elasticsearch {
+      hosts => ["{{ elasticsearch_endpoint }}"]
+      index => "%{environment}-syslog-%{+YYYY.MM.dd}"
+    }
+  }
+
+  else if [type] == "syslog" and ![environment] {
+    elasticsearch {
+      hosts => ["{{ elasticsearch_endpoint }}"]
+      index => "unknown-%{+YYYY.MM.dd}"
+    }
+  }
+
+  else if [type] == "postgresql-error" {
+    elasticsearch {
+      hosts => ["{{ elasticsearch_endpoint }}"]
+      index => "%{environment}-%{application}-postgresql-error-%{+YYYY.MM.dd}"
+    }
+  }
+
+  else if [type] == "drupal-access" {
+    elasticsearch {
+      hosts => ["{{ elasticsearch_endpoint }}"]
+      index => "%{environment}-drupal-access-%{+YYYY.MM.dd}"
+    }
+  }
+
+  else if [type] == "apache-access" {
+    elasticsearch {
+      hosts => ["{{ elasticsearch_endpoint }}"]
+      index => "%{environment}-apache-access-%{+YYYY.MM.dd}"
+    }
+  }
+
+  else if [type] == "apache-error" {
+    elasticsearch {
+      hosts => ["{{ elasticsearch_endpoint }}"]
+      index => "%{environment}-apache-error-%{+YYYY.MM.dd}"
+    }
+  }
+
+  else if [type] == "qgis-access" {
+    elasticsearch {
+      hosts => ["{{ elasticsearch_endpoint }}"]
+      index => "%{environment}-qgis-access-%{+YYYY.MM.dd}"
+    }
+  }
+
+  else if [type] == "lb-access" {
+    elasticsearch {
+      hosts => ["{{ elasticsearch_endpoint }}"]
+      index => "%{environment}-%{application}-lb-access-%{+YYYY.MM.dd}"
+    }
+  }
+
+  else if [type] == "qgis-error" {
+    elasticsearch {
+      hosts => ["{{ elasticsearch_endpoint }}"]
+      index => "%{environment}-qgis-error-%{+YYYY.MM.dd}"
+    }
+  }
+
+  else if [type] == "qgis-application" {
+    elasticsearch {
+      hosts => ["{{ elasticsearch_endpoint }}"]
+      index => "%{environment}-qgis-application-%{+YYYY.MM.dd}"
+    }
+  }
+
+  else if [type] == "weave-application" {
+    elasticsearch {
+      hosts => ["{{ elasticsearch_endpoint }}"]
+      index => "%{environment}-weave-application-%{+YYYY.MM.dd}"
+    }
+  }
+
+  else if [type] == "http" {
+    # explicitly declare http to be unknown - anything going here should
+    # be parsed above and log type set.
+    elasticsearch {
+      hosts => ["{{ elasticsearch_endpoint }}"]
+      index => "unknown-%{+YYYY.MM.dd}"
+    }
+  }
+
+# Save as raw logfile
+#  file {
+#        path => "/logstash-savelog/logstash-save-%{+YYYY-MM-dd}.txt"
+#        codec => line { format => "%{message}"}
+#  }
+
+  else {
+      elasticsearch {
+        hosts => ["{{ elasticsearch_endpoint }}"]
+        index    => "unknown-%{+YYYY.MM.dd}"
+    }
+  }

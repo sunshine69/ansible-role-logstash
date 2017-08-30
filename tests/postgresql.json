@@ -1,0 +1,69 @@
+{
+  "fields": {
+    "filename": "rds/vpc-31-tst-drupal-rds-master_error/postgresql.log.2017-06-06-07",
+    "type": "http"
+  },
+  "ignore": [
+    "filename",
+    "host",
+    "timestamp"
+  ],
+  "testcases": [
+    {
+      "input": [
+         "2017-06-06 07:29:52 UTC::@:[3752]:LOG:  checkpoint starting: time"
+      ],
+      "expected": [
+        {
+          "@timestamp": "2017-06-06T07:29:52.000Z",
+          "application": "drupal",
+          "environment": "tst",
+          "level": "LOG",
+          "pid": 3752,
+          "message": "checkpoint starting: time",
+          "type": "postgresql-error"
+        }
+      ]
+    },
+    {
+      "input": [
+        "2017-06-06 07:29:52 UTC::@:[3752]:LOG:  checkpoint complete: wrote 1 buffers (0.0%); 0 transaction log file(s) added, 0 removed, 1 recycled; write=0.104 s, sync=0.001 s, total=0.115 s; sync files=1, longest=0.001 s, average=0.001 s; distance=16384 kB, estimate=16961 kB"
+      ],
+      "expected": [
+        {
+          "@timestamp": "2017-06-06T07:29:52.000Z",
+          "application": "drupal",
+          "environment": "tst",
+          "level": "LOG",
+          "pid": 3752,
+          "message": "checkpoint complete: wrote 1 buffers (0.0%); 0 transaction log file(s) added, 0 removed, 1 recycled; write=0.104 s, sync=0.001 s, total=0.115 s; sync files=1, longest=0.001 s, average=0.001 s; distance=16384 kB, estimate=16961 kB",
+          "type": "postgresql-error"
+        }
+      ]
+    },
+    {
+      "input": [
+        "2017-06-09 00:22:32 UTC:10.28.52.72(46924):gisdba@dpe:[2016]:LOG:  duration: 845.558 ms  execute S_4: SELECT pp.cadastre_intersect($1,$2,$3)"
+      ],
+      "expected": [
+        {
+          "@timestamp": "2017-06-09T00:22:32.000Z",
+          "application": "drupal",
+          "database": "dpe",
+          "duration": 845.558,
+          "environment": "tst",
+          "level": "LOG",
+          "pid": 2016,
+          "message": "duration: 845.558 ms  execute S_4: SELECT pp.cadastre_intersect($1,$2,$3)",
+          "operation": "execute",
+          "sourceip": "10.28.52.72",
+          "sourceport": 46924,
+          "statement": "SELECT pp.cadastre_intersect($1,$2,$3)",
+          "statement_id": "S_4",
+          "type": "postgresql-error",
+          "username": "gisdba"
+        }
+      ]
+    }
+  ]
+}

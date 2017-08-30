@@ -1,0 +1,6 @@
+# See https://github.com/logstash/logstash-logback-encoder#tcp-appenders
+  tcp {
+    port => 4560
+    type => "logback"
+    codec => json_lines
+  }

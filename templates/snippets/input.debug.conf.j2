@@ -1,0 +1,11 @@
+# This is only for test at localhost. There wil be no sg or nacl to open 5050 to the world.
+# You can cat and nc at localhost your log file to test your grok pattern etc
+  tcp {
+   port => 5050
+   type => "tcptest"
+   codec => multiline {
+              pattern => "^[\s]+"
+              #negate => true
+              what => "previous"
+            }
+ }

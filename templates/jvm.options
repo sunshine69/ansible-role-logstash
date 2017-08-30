@@ -1,0 +1,96 @@
+## JVM configuration
+
+# Xms represents the initial size of total heap space
+# Xmx represents the maximum size of total heap space
+
+{% if logstash_nodes[central_name][logstash_node_name].logstash_java_mem_heap|default(False) %}
+-Xms{{ logstash_nodes[central_name][logstash_node_name].logstash_java_mem_heap }}
+-Xmx{{ logstash_nodes[central_name][logstash_node_name].logstash_java_mem_heap }}
+{% endif %}
+{% if logstash_nodes[central_name][logstash_node_name].logstash_java_mem_eden|default(False) %}
+-Xmn{{ logstash_nodes[central_name][logstash_node_name].logstash_java_mem_eden }}
+{% endif %}
+
+## Expert settings
+################################################################
+##
+## All settings below this section are considered
+## expert settings. Don't tamper with them unless
+## you understand what you are doing
+##
+################################################################
+
+# These settings are default setting in the logstash deb package.
+## GC configuration
+-XX:+UseParNewGC
+-XX:+UseConcMarkSweepGC
+-XX:CMSInitiatingOccupancyFraction=85
+-XX:+UseCMSInitiatingOccupancyOnly
+
+## optimizations
+# disable calls to System#gc
+-XX:+DisableExplicitGC
+# set to headless, just in case
+-Djava.awt.headless=true
+
+# ensure UTF-8 encoding by default (e.g. filenames)
+-Dfile.encoding=UTF-8
+
+## heap dumps
+
+# generate a heap dump when an allocation from the Java heap fails
+# heap dumps are created in the working directory of the JVM
+-XX:+HeapDumpOnOutOfMemoryError
+
+# Please add all custom changes into this section
+
+# Allow to use custom java.security file. See reference here -
+# http://docs.oracle.com/javase/7/docs/technotes/guides/security/PolicyFiles.html
+-Djava.security.policy=file:///etc/logstash/java.security 
+
+{% if logstash_nodes[central_name][logstash_node_name].jvmopt_expert_settings|default(False) %}
+## locale
+# Set the locale language
+#-Duser.language=en
+
+# Set the locale country
+#-Duser.country=US
+
+# use our provided JNA always versus the system one
+#-Djna.nosys=true
+
+# Set the locale variant, if any
+#-Duser.variant=
+
+## basic
+
+# set the I/O temp directory
+#-Djava.io.tmpdir=$HOME
+
+# specify an alternative path for heap dumps
+# ensure the directory exists and has sufficient space
+-XX:HeapDumpPath=/var/log/logstash/heapdump.hprof
+
+-XX:SurvivorRatio=6
+-XX:InitialTenuringThreshold=8
+
+# Java networking options
+# cache dns lookup for 1 minute
+-Djava.security.properties=/etc/logstash/java.security
+-Djava.net.preferIPv4Stack=true
+
+## GC logging
+-XX:+PrintGCDetails
+-XX:+PrintGCTimeStamps
+-XX:+PrintGCDateStamps
+-XX:+PrintTenuringDistribution
+-XX:+PrintGCApplicationStoppedTime
+-XX:+PrintGCApplicationConcurrentTime
+
+# log GC status to a file with time stamps
+# ensure the directory exists
+-Xloggc:{{ logstash_java_log_file }}-%t
+-XX:+UseGCLogFileRotation
+-XX:NumberOfGCLogFiles=8
+-XX:GCLogFileSize=128M
+{% endif %}

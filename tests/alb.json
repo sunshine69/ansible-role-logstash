@@ -1,0 +1,53 @@
+{
+  "fields": {
+    "filename": "lb/tst/qgis/AWSLogs/988497896458/elasticloadbalancing/ap-southeast-2/2017/06/14/988497896458_elasticloadbalancing_ap-southeast-2_app.tst-qgis-lb.f2c691cb5b57fcf7_20170614T0505Z_10.31.61.237_9ipo1whd.log.gz",
+    "type": "http"
+  },
+  "ignore": [
+    "filename",
+    "host",
+    "message",
+    "timestamp"
+  ],
+  "testcases": [
+    {
+      "input": [
+         "http 2017-06-14T05:04:45.784124Z app/tst-qgis-lb/f2c691cb5b57fcf7 10.31.51.245:43110 10.31.71.115:80 0.000 0.186 0.000 200 200 759 5078 \"GET http://qgis-lb.tst.aws.planningportal.internal:80/cgi-bin/qgis_mapserv.fcgi?MAP=/data/maps/nswdpe.qgs&SERVICE=WMS&SRS=EPSG:3857&CRS=EPSG:3857&WIDTH=1198&MAP_RESOLUTION=96&DPI=96&ITEMFONTSIZE=11&BBOX=1.6800818280835375E7,-4018422.581800325,1.6800907706186824E7,-4018377.7944790646&FORMAT_OPTIONS=dpi:96&HEIGHT=600&TRANSPARENT=TRUE&REQUEST=GetMap&VERSION=1.1.0&LABELSOFF=land_zoning&FORMAT=image%2Fpng&LAYERS=land_zoning&STYLES= HTTP/1.1\" \"Weave/2.5\" - - arn:aws:elasticloadbalancing:ap-southeast-2:988497896458:targetgroup/vpc-31-tst-qgis-default-tg/bb64750b67de7bf2 \"Root=1-5940c3ed-7b2d92f6035085da6139d92a\""
+      ],
+      "expected": [
+        {
+          "@timestamp": "2017-06-14T05:04:45.784Z",
+          "application": "qgis",
+          "agent": "Weave/2.5",
+          "backendip": "10.31.71.115",
+          "backendport": 80,
+          "backend_processing_time": 0.186,
+          "backend_response": 200,
+          "bytes": 5078,
+          "clientip": "10.31.51.245",
+          "clientport": 43110,
+          "environment": "tst",
+          "httpversion": "1.1",
+          "loadbalancer": "app/tst-qgis-lb/f2c691cb5b57fcf7",
+          "path": "/cgi-bin/qgis_mapserv.fcgi",
+          "params": "?MAP=/data/maps/nswdpe.qgs&SERVICE=WMS&SRS=EPSG:3857&CRS=EPSG:3857&WIDTH=1198&MAP_RESOLUTION=96&DPI=96&ITEMFONTSIZE=11&BBOX=1.6800818280835375E7,-4018422.581800325,1.6800907706186824E7,-4018377.7944790646&FORMAT_OPTIONS=dpi:96&HEIGHT=600&TRANSPARENT=TRUE&REQUEST=GetMap&VERSION=1.1.0&LABELSOFF=land_zoning&FORMAT=image%2Fpng&LAYERS=land_zoning&STYLES=",
+          "port": "80",
+          "proto": "http",
+          "protocol": "http",
+          "received_bytes": 759,
+          "request": "http://qgis-lb.tst.aws.planningportal.internal:80/cgi-bin/qgis_mapserv.fcgi?MAP=/data/maps/nswdpe.qgs&SERVICE=WMS&SRS=EPSG:3857&CRS=EPSG:3857&WIDTH=1198&MAP_RESOLUTION=96&DPI=96&ITEMFONTSIZE=11&BBOX=1.6800818280835375E7,-4018422.581800325,1.6800907706186824E7,-4018377.7944790646&FORMAT_OPTIONS=dpi:96&HEIGHT=600&TRANSPARENT=TRUE&REQUEST=GetMap&VERSION=1.1.0&LABELSOFF=land_zoning&FORMAT=image%2Fpng&LAYERS=land_zoning&STYLES=",
+          "request_processing_time": 0.0,
+          "response_processing_time": 0.0,
+          "ssl_cipher": "-",
+          "ssl_protocol": "-",
+          "status": 200,
+          "target_group_arn": "arn:aws:elasticloadbalancing:ap-southeast-2:988497896458:targetgroup/vpc-31-tst-qgis-default-tg/bb64750b67de7bf2",
+          "trace_id": "Root=1-5940c3ed-7b2d92f6035085da6139d92a",
+          "type": "lb-access",
+          "urihost": "qgis-lb.tst.aws.planningportal.internal:80",
+          "verb": "GET"
+        }
+      ]
+    }
+  ]
+}

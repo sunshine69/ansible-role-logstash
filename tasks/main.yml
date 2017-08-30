@@ -1,0 +1,212 @@
+- include: get_aws_elasticsearch_endpoint.yml
+- include: create_logstash_route53_zone.yml
+
+- block:
+    - name: Install elastic apt source
+      copy:
+        content: "deb https://artifacts.elastic.co/packages/5.x/apt stable main"
+        dest: /etc/apt/sources.list.d/elastic-5.x.list
+
+    - name: Install NewRelic APT keys
+      apt_key:
+        id: "D88E42B4"
+        url: https://artifacts.elastic.co/GPG-KEY-elasticsearch
+        state: present
+
+    - name: Install logstash {{logstash_ver}}
+      apt:
+        name: "logstash"
+        state: "present"
+        update_cache: yes
+
+    - name: Install logstash plugins
+      command: "/usr/share/logstash/bin/logstash-plugin install --version {{ item.version }} {{ item.name }}"
+      args:
+        creates: "/usr/share/logstash/vendor/bundle/jruby/1.9/gems/{{ item.name }}-{{ item.version }}"
+      with_items: "{{ logstash_plugins }}"
+
+    - name: set logstash user and group facts
+      set_fact:
+        logstash_user: logstash
+        logstash_group: logstash
+
+    - name: Write logstash defaults file
+      copy:
+        src: logstash.defaults
+        dest: /etc/logstash/defaults
+      notify: restart logstash
+
+    - name: set logstash user and group facts
+      set_fact:
+        logstash_user: logstash
+        logstash_group: logstash
+
+    - name: Write logstash systemd unit file
+      template:
+        src: logstash.service
+        dest: /etc/systemd/system/logstash.service
+      notify:
+        - reload systemd
+        - restart logstash
+
+    - name: Enable logstash service
+      service:
+        name: logstash
+        enabled: yes
+        state: started
+
+  when: deployment_type == "deb"
+
+
+- name: Copy the logstash server keystore file
+  copy:
+    src: logstash_server_keystore.jks
+    dest: "{{ logstash_keystore_path }}"
+    owner: "{{ logstash_user|default(omit) }}"
+    group: "{{ logstash_group|default(omit) }}"
+
+- name: Deploy the logstash.yml
+  template:
+    src: "logstash.yml"
+    dest: "/etc/logstash/logstash.yml"
+    backup: yes
+    owner: "{{ logstash_user|default(omit) }}"
+    group: "{{ logstash_group|default(omit) }}"
+  notify: restart logstash
+
+- name: make sure /etc/logstash/conf.d/ exists
+  file:
+    path: /etc/logstash/conf.d
+    state: directory
+    owner: "{{ logstash_user|default(omit) }}"
+    group: "{{ logstash_group|default(omit) }}"
+
+- name: Deploy the logstash.conf
+  template:
+    src: "logstash.conf"
+    dest: "/etc/logstash/conf.d/logstash.conf"
+    backup: no
+    owner: "{{ logstash_user|default(omit) }}"
+    group: "{{ logstash_group|default(omit) }}"
+  notify: reload logstash
+  register: logstash_conf
+
+- name: Deploy custom logstash patterns
+  copy:
+    src: patterns
+    dest: /etc/logstash
+    owner: "{{ logstash_user|default(omit) }}"
+    group: "{{ logstash_group|default(omit) }}"
+  notify: reload logstash
+
+- name: Deploy the jvm.options
+  template:
+    src: "jvm.options"
+    dest: "/etc/logstash/jvm.options"
+    backup: yes
+    owner: "{{ logstash_user|default(omit) }}"
+    group: "{{ logstash_group|default(omit) }}"
+  notify: restart logstash
+  register: jvm_options_conf
+
+- name: Deploy the jvm.options
+  copy:
+    src: "java.security"
+    dest: "/etc/logstash/java.security"
+    owner: "{{ logstash_user|default(omit) }}"
+    group: "{{ logstash_group|default(omit) }}"
+  notify: restart logstash
+
+- block:
+    - name: Deploy the logstash ssl related files
+      copy:
+        content: "{{ item.content }}"
+        dest: "{{ item.path }}"
+        owner: "{{ logstash_user|default(omit) }}"
+        group: "{{ logstash_group|default(omit) }}"
+        mode: "{{ '0664' if item.path|search('/[^\\s]+\\.key$/') else '0600' }}"
+      with_items:
+        - "{{ logstash_ssl_certificate }}"
+        - "{{ logstash_ssl_certificate_authorities }}"
+        - "{{ logstash_ssl_key }}"
+      notify: restart logstash
+  when: logstash_ssl_certificate is defined and logstash_ssl_certificate
+
+- block:
+    - pip: name=docker-py state=present
+
+    - name: Install logstash {{logstash_ver}}
+      apt:
+        name: "logstash"
+        state: "absent"
+
+    - name: Install docker
+      apt:
+        name: docker.io
+        state: present
+
+    - name: Deploy supported files and directories
+      file:
+        path: "{{item.path}}"
+        state: directory
+        mode: "{{item.mode|default('0755')}}"
+      with_items:
+        - { path: "/var/tmp/logstash-docker"}
+        - { path: "/etc/logstash/patterns" }
+
+    - name: Deploy the Dockerfile to remote
+      template:
+        src: Dockerfile
+        dest: /var/tmp/logstash-docker/Dockerfile
+      register: dockerfile
+
+    - name: Deploy the docker default file to remote
+      template:
+        src: docker-default-config.j2
+        dest: /etc/default/docker
+      register: docker-default-config
+      notify: Restart docker
+
+    - name: Set fact force_image_build yes
+      set_fact:
+        force_image_build: "yes"
+      when: dockerfile.changed
+
+    - name: Kill current container
+      docker_container:
+        name: "logstash"
+        state: absent
+      when: dockerfile.changed
+      register: logstash_kill_container
+
+    # if dockerfile.changed then we already kill the CT before, stoping them here give error
+
+    - name: Stop current container
+      docker_container: name="logstash" state=stopped
+      when: ( logstash_conf.changed or jvm_options_conf.changed ) and not dockerfile.changed
+
+    - name: Build docker image {{logstash_image_name}}
+      docker_image:
+        name: "{{logstash_image_name}}"
+        path: "/var/tmp/logstash-docker"
+        state: present
+        force: "{{force_image_build}}"
+
+    - name: Start logstash container
+      docker_container:
+        name: "logstash"
+        image: "{{logstash_image_name}}"
+        volumes:
+          - "/etc/logstash/conf.d/logstash.conf:/etc/logstash.conf"
+          - "/etc/logstash/jvm.options:/etc/logstash/jvm.options"
+          - "{{ logstash_keystore_path }}:{{ logstash_keystore_path }}"
+          - "/etc/logstash/patterns:/etc/logstash/patterns"
+        restart_policy: "{{ docker_logstash_restart_policy }}"
+        restart_retries: 3
+        log_driver: "json-file"
+        log_options:
+          max-size: "100m"
+          max-file: "5"
+        ports: "{{ logstash_docker_exposed_ports }}"
+        state: "started"
+  when: deployment_type == "docker"

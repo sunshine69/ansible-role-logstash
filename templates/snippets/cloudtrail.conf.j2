@@ -1,0 +1,45 @@
+{% for _env in cloudtrail_envs %}
+  cloudwatch {
+    namespace => "AWS/EC2"
+    metrics => [ "CPUUtilization", "CPUCreditBalance", "StatusCheckFailed_Instance", "StatusCheckFailed_System","DiskWriteOps", "NetworkPacketsIn", "DiskWriteBytes" ]
+    filters => { "tag:Environment" => "{{ _env }}" }
+    region => "ap-southeast-2"
+    type => "cloudwatch"
+    add_field => { "metrictype" => "ec2" }
+    add_field => { "environment" => "{{ _env }}" }
+  }
+{% endfor %}
+
+# TODO Currently we have no tag on volume thus we will get nothing. Leave it
+# here until we implment tag on volume it will just work
+  cloudwatch {
+    namespace => "AWS/EBS"
+    metrics => ["VolumeQueueLength"]
+    filters => { "tag:Environment" => "dev" }
+    region => "ap-southeast-2"
+    type => "cloudwatch"
+    add_field => { "metrictype" => "VolumeQueueLength" }
+
+  }
+
+  cloudwatch {
+    namespace => "AWS/RDS"
+    metrics => ["CPUUtilization", "CPUCreditUsage", "DiskQueueDepth", "TransactionLogsGeneration", "ReadIOPS", "FreeStorageSpace", "WriteThroughput", "ReadThroughput", "NetworkReceiveThroughput", "ReadLatency", "WriteLatency", "WriteIOPS", "FreeableMemory", "DatabaseConnections", "NetworkTransmitThroughput", "SwapUsage", "TransactionLogsDiskUsage", "MaximumUsedTransactionIDs", "CPUCreditBalance" ]
+    filters => { "EngineName" => "postgres" } # Only supports EngineName, DatabaseClass and DBInstanceIdentifier
+    region => "ap-southeast-2"
+    type => "cloudwatch"
+    add_field => { "metrictype" => "postgres" }
+    add_field => { "environment" => "all" }
+  }
+
+{% for _env in cloudtrail_envs %}
+  cloudwatch {
+    namespace => "AWS/ELB"
+    metrics => ["Latency", "RequestCount", "BackendConnectionErrors", "SurgeQueueLength", "RequestCount", "HealthyHostCount", "UnHealthyHostCount", "HTTPCode_ELB_5XX", "HTTPCode_Backend_4XX", "HTTPCode_Backend_2XX", "HTTPCode_Backend_5XX"]
+    filters => { "tag:Environment" => "{{ _env }}" }
+    region => "ap-southeast-2"
+    type => "cloudwatch"
+    add_field => { "metrictype" => "elb" }
+    add_field => { "environment" => "{{ _env }}" }
+  }
+{% endfor %}

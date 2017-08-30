@@ -1,0 +1,66 @@
+- hosts: localhost
+  vars:
+    output_file: ./output/logstash.out
+
+  tasks:
+    - block:
+        - name: create logstash debug configuration
+          template:
+            src: ../templates/logstash.debug.conf.j2
+            dest: ./logstash.conf
+
+        - name: ensure output directory exists
+          file:
+            state: directory
+            path: "{{ output_file | dirname }}"
+
+        - name: ensure output file does not exist
+          file:
+            state: absent
+            path: "{{ output_file }}"
+
+        - name: ensure patterns directory exists
+          file:
+            state: directory
+            path: patterns
+
+        - name: put patterns into place
+          copy:
+            src: ../files/patterns
+            dest: .
+
+        - name: start logstash service
+          shell: setsid {{ logstash_path }} -f ./logstash.conf &
+
+        - name: wait for logstash to be available
+          wait_for:
+            port: 8080
+
+        - name: send logstash test data
+          uri:
+            url: "http://127.0.0.1:8080/"
+            headers:
+              "content-type": "application/json"
+            method: "PUT"
+            body: "{{ lookup('file', './postgresql.message') }}"
+            body_format: json
+
+        - name: wait for output file
+          wait_for:
+            path: "{{ output_file }}"
+
+        - name: turn data into a variable
+          set_fact:
+            data: "{{ lookup('file', output_file).split('\n')|map('from_json')|list }}"
+
+        - name: validate data
+          assert:
+            that:
+              - 'data|length == 16'
+              - 'data[0].host == "vpc-30-int-gis-rds-master"'
+              - 'data[0].application == "gis"'
+              - '"headers" not in data[0]'
+
+      always:
+        - name: kill logstash serevice
+          command: pkill -f logstash.conf

@@ -1,0 +1,49 @@
+{
+  "fields": {
+    "filename": "elb/int/weave/AWSLogs/988497896458/elasticloadbalancing/ap-southeast-2/2017/06/08/988497896458_elasticloadbalancing_ap-southeast-2_int-weave-elb_20170608T0300Z_10.30.42.41_30qgk4lg.log",
+    "type": "http"
+  },
+  "ignore": [
+    "filename",
+    "host",
+    "message",
+    "timestamp"
+  ],
+  "testcases": [
+    {
+      "input": [
+         "2017-06-08T02:59:32.765079Z int-weave-elb 10.30.23.135:36962 10.30.52.148:8080 0.000045 0.880501 0.000037 200 200 0 119338 \"GET http://weave-lb.int.aws.planningportal.internal:8080/weave/services/dpe/v1/cadastre_intersect/2284224_100_Elizabeth_Macarthur_Avenue__2_Camden_South_DP1050479 HTTP/1.1\" \"Drupal/8.3.1 (+https://www.drupal.org/) GuzzleHttp/6.2.1 curl/7.38.0 PHP/7.1.2\" - -"
+      ],
+      "expected": [
+        {
+          "@timestamp": "2017-06-08T02:59:32.765Z",
+          "application": "weave",
+          "agent": "Drupal/8.3.1 (+https://www.drupal.org/) GuzzleHttp/6.2.1 curl/7.38.0 PHP/7.1.2",
+          "backendip": "10.30.52.148",
+          "backendport": 8080,
+          "backend_processing_time": 0.880501,
+          "backend_response": 200,
+          "bytes": 119338,
+          "clientip": "10.30.23.135",
+          "clientport": 36962,
+          "environment": "int",
+          "httpversion": "1.1",
+          "loadbalancer": "int-weave-elb",
+          "path": "/weave/services/dpe/v1/cadastre_intersect/2284224_100_Elizabeth_Macarthur_Avenue__2_Camden_South_DP1050479",
+          "port": "8080",
+          "proto": "http",
+          "received_bytes": 0,
+          "request": "http://weave-lb.int.aws.planningportal.internal:8080/weave/services/dpe/v1/cadastre_intersect/2284224_100_Elizabeth_Macarthur_Avenue__2_Camden_South_DP1050479",
+          "request_processing_time": 0.000045,
+          "response_processing_time": 0.000037,
+          "ssl_cipher": "-",
+          "ssl_protocol": "-",
+          "status": 200,
+          "type": "lb-access",
+          "urihost": "weave-lb.int.aws.planningportal.internal:8080",
+          "verb": "GET"
+        }
+      ]
+    }
+  ]
+}

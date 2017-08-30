@@ -1,0 +1,57 @@
+---
+# deployment_type: <docker|deb> Use docker or install from deb files.
+deployment_type: "deb"
+docker_log_max_file_size: "500m"
+docker_log_max_file_count: 5
+
+force_image_build: "no"
+logstash_image_name: "xvt-logstash"
+
+# Elasticsearch URL for logstash output
+es_url: "http://search-eplanning-uat-kjjnpuogmdhbxr5fusgx4kydta.ap-southeast-2.es.amazonaws.com"
+logstash_ver: "5"
+
+logstash_docker_exposed_ports:
+  - "{{ filebeat_port }}:{{ filebeat_port }}"
+  - "{{ logstash_input_http_port }}:{{ logstash_input_http_port }}"
+  # Local test only
+  - "{{ logstash_input_tcp_port }}:{{ logstash_input_tcp_port }}"
+docker_logstash_restart_policy: "unless-stopped"
+
+logstash_http_basic_auth_user: "xvt_logstash"
+logstash_http_basic_auth_password: "should_be_overriden_in_vault_file"
+logstash_keystore_path: "/etc/logstash_server_keystore.jks"
+logstash_keystore_password: "should_be_overriden_in_vault_file"
+
+filebeat_port: "5044"
+logstash_input_http_port: "8080"
+logstash_input_tcp_port: "5050"
+
+# Supply one of them is enough. elasticsearch_endpoint will take higher priority.
+aws_elasticsearch_name: ""
+elasticsearch_endpoint: ""
+logstash_java_log_file: /var/log/logstash/gc.log
+cloudtrail_envs: "{{ aws[aws_account_name].envs.keys() + [central_name] }}"
+logstash_nice: 19
+logstash_open_files_limit: 65535
+logstash_pipeline_workers: 4
+logstash_pipeline_output_workers: 2
+
+# SSL mode for beat. If logstash_ssl_certificate is deifned and points to a
+# path to the cert then it will be activated
+logstash_ssl_enabled: True
+
+logstash_ssl_certificate:
+  content: ""
+  path: "/etc/logstash/server.crt"
+
+logstash_ssl_certificate_authorities:
+  content: ""
+  path: "/etc/logstash/ca.crt"
+
+logstash_ssl_key:
+  content: ""
+  path: "/etc/logstash/server.key"
+
+# force_peer|peer|none (default)
+logstash_beat_ssl_verify_mode: none

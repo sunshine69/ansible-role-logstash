@@ -1,0 +1,36 @@
+  beats {
+    port => {{ filebeat_port }}
+    type => "beat"
+
+    ssl => false
+
+    codec => multiline {
+              pattern => "^[\s]+"
+              #negate => true
+              what => "previous"
+            }
+  }
+
+  beats {
+    port => {{ filebeat_ssl_port }}
+    type => "beat"
+
+    ssl => true
+    ssl_certificate => "{{ logstash_ssl_certificate.path }}"
+    ssl_certificate_authorities => "{{ logstash_ssl_certificate_authorities.path }}"
+
+# Logstash accept pkcs8 private key format with pass phrase (no where in LG doco says so)
+# The DevOps CA tools generate the key in standard openssl (pkcs1) pem format
+# Thus we need to convert using the command
+# openssl pkcs8 -topk8  -inform PEM -outform PEM -in <in.key> -out <out.key.pkcs8.pem>
+# The -outform MUST be PEM, LG does not read the binary DER format. Again no doco
+
+    ssl_key => "{{ logstash_ssl_key.path }}"
+    ssl_verify_mode => "{{ logstash_beat_ssl_verify_mode }}"
+
+    codec => multiline {
+              pattern => "^[\s]+"
+              #negate => true
+              what => "previous"
+            }
+  }

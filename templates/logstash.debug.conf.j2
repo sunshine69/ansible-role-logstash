@@ -1,0 +1,15 @@
+input {
+  http {
+{% include "snippets/http.default.conf.j2" %}
+
+ }
+{% include "snippets/input.debug.conf.j2" %}
+
+}
+
+{% include "snippets/filters.conf.j2" %}
+
+output {
+{% include "snippets/output.debug.conf.j2" %}
+
+}

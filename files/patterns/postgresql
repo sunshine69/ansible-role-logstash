@@ -1,0 +1,1 @@
+POSTGRESQL_COMMON (?<timestamp>%{YEAR}-%{MONTHNUM}-%{MONTHDAY} %{TIME} %{TZ}):(?:%{IP:sourceip}\(%{NUMBER:sourceport:int}\))?:(?<username>[^@]*)@(?<database>[^:]*):\[%{NUMBER:pid:int}\]:%{WORD:level}:\s+

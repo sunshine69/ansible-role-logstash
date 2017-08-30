@@ -1,0 +1,41 @@
+{
+  "fields": {
+    "filename": "elb/uat/qgis/AWSLogs/988497896458/elasticloadbalancing/ap-southeast-2/2017/06/13/988497896458_elasticloadbalancing_ap-southeast-2_uat-qgis-elb_20170613T0445Z_10.28.62.250_36qpdmmr.log",
+    "type": "http"
+  },
+  "ignore": [
+    "filename",
+    "host",
+    "message",
+    "timestamp"
+  ],
+  "testcases": [
+    {
+      "input": [
+         "2017-06-13T04:00:24.321909Z uat-qgis-elb 10.28.52.72:36240 10.28.71.88:80 0.001435 0.000009 0.000013 - - 780 21313 \"- - - \" \"-\" - -"
+      ],
+      "expected": [
+        {
+          "@timestamp": "2017-06-13T04:00:24.321Z",
+          "application": "qgis",
+          "agent": "-",
+          "backendip": "10.28.71.88",
+          "backendport": 80,
+          "backend_processing_time": 0.000009,
+          "bytes": 21313,
+          "clientip": "10.28.52.72",
+          "clientport": 36240,
+          "environment": "uat",
+          "loadbalancer": "uat-qgis-elb",
+          "rawrequest": "- - - ",
+          "received_bytes": 780,
+          "request_processing_time": 0.001435,
+          "response_processing_time": 0.000013,
+          "ssl_cipher": "-",
+          "ssl_protocol": "-",
+          "type": "lb-access"
+        }
+      ]
+    }
+  ]
+}

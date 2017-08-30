@@ -1,0 +1,50 @@
+{
+  "fields": {
+    "type": "drupal-access"
+  },
+  "ignore": [
+    "host",
+    "message",
+    "timestamp"
+  ],
+  "testcases": [
+    {
+      "input": [
+        "10.40.15.168 - - [06/Jun/2017:14:49:44 +1000] \"GET / HTTP/1.1\" 200 41605 139927 \"-\" \"fake-user-agent-so-not-dropped\" \"-\"",
+         "52.62.162.241 - - [14/Jun/2017:16:06:58 +1000] \"GET /weave/services/v1/map/show?mapengine.id=nswdpe.ov&layers=local_government_area%2Csuburb&crs=EPSG%3A3857&minx=16817381.55368249&miny=-4012005.4426657325&maxx=16819664.472927265&maxy=-4009722.523420954&scale=31956.89207426&dpi=96&width=270&height=270&opacity=1 HTTP/1.1\" 200 27525 325997 \"-\" \"fake-user-agent-so-not-dropped\" \"52.62.162.241, 54.239.202.4\""
+      ],
+      "expected": [
+        {
+          "@timestamp": "2017-06-06T04:49:44.000Z",
+          "agent": "fake-user-agent-so-not-dropped",
+          "auth": "-",
+          "bytes": 41605,
+          "clientip": "10.40.15.168",
+          "httpversion": "1.1",
+          "ident": "-",
+          "method": "GET",
+          "request": "/",
+          "responsetime": 139927,
+          "referrer": "-",
+          "status": 200,
+          "type": "drupal-access"
+        },
+        {
+          "@timestamp": "2017-06-14T06:06:58.000Z",
+          "agent": "fake-user-agent-so-not-dropped",
+          "auth": "-",
+          "bytes": 27525,
+          "clientip": "52.62.162.241",
+          "httpversion": "1.1",
+          "ident": "-",
+          "method": "GET",
+          "request": "/weave/services/v1/map/show?mapengine.id=nswdpe.ov&layers=local_government_area%2Csuburb&crs=EPSG%3A3857&minx=16817381.55368249&miny=-4012005.4426657325&maxx=16819664.472927265&maxy=-4009722.523420954&scale=31956.89207426&dpi=96&width=270&height=270&opacity=1",
+          "responsetime": 325997,
+          "referrer": "-",
+          "status": 200,
+          "type": "drupal-access"
+        }
+      ]
+    }
+  ]
+}

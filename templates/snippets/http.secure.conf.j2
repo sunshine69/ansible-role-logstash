@@ -1,0 +1,8 @@
+   user => "{{ logstash_http_basic_auth_user }}"
+   password => "{{ logstash_http_basic_auth_password }}"
+   ssl => true
+
+# The keystore file is generated using command
+# /opt/java/bin/keytool -keystore logstash_server_keystore.jks -genkey -alias logstash_server
+   keystore => "{{ logstash_keystore_path }}"
+   keystore_password => "{{ logstash_keystore_password }}"

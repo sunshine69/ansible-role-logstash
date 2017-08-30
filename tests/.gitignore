@@ -1,0 +1,5 @@
+filters.conf
+output
+patterns
+*.retry
+logstash.conf

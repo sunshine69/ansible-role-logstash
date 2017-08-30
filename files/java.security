@@ -1,0 +1,4 @@
+# Reduce the DNS caching time to allow LG to try other ES master node if the
+# current one is busy doing maintenance. Value 60 needs to be watched out for suitability,
+# not final yet
+networkaddress.cache.ttl=60
