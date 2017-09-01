@@ -130,7 +130,7 @@
         - "{{ logstash_ssl_certificate_authorities }}"
         - "{{ logstash_ssl_key }}"
       notify: restart logstash
-  when: logstash_ssl_certificate is defined and logstash_ssl_certificate
+  when: logstash_ssl_certificate is defined and logstash_ssl_certificate and item.path
 
 - block:
     - pip: name=docker-py state=present
