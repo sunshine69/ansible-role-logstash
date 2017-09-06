@@ -220,6 +220,18 @@ filter {
     }
   }
 
+  # Payment service logger format: remote-client - - [timestamp] "method uri version" status content-length "referrer" "user-agent"
+  # Payment service date format example: Tue, 05 Sep 2017 17:37:53 GMT
+  if [type] == "logback" {
+    grok {
+      match => { "message" => "%{IPORHOST:clientip} %{HTTPDUSER:ident} %{HTTPDUSER:auth} \[(?<timestamp>%{DAY}, %{MONTHDAY} %{MONTH} %{YEAR} %{TIME} %{WORD})\] \"(?:%{WORD:method} %{NOTSPACE:request}(?: HTTP/%{NUMBER:httpversion})?|%{DATA:rawrequest})\" %{NUMBER:status:int} (?:%{NUMBER:bytes:int}|-) \"(?<referrer>[^\"]*)\" \"(?<agent>[^\"]*)\"" }
+      remove_tag => [ "_grokparsefailure" ]
+    }
+    date {
+      match => [ "timestamp", "EEE, dd MMM yyyy HH:mm:ss ZZZ" ]
+    }
+  }
+
   # ignore all health check calls
   if [agent] =~ /^ELB-HealthChecker/ or [agent] =~ /^runscope-remote-radar/ {
     drop { }
