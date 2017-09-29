@@ -1,5 +1,5 @@
 filter {
 {% include "snippets/filters-common.conf.j2" %}
 
-{% include "snippets/filters-" + logstash_aws_account_name + ".conf.j2" ignore missing %}
+{% include "snippets/filters-" + project_name + ".conf.j2" ignore missing %}
 }

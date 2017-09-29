@@ -1,5 +1,5 @@
 {% include  "snippets/output.elasticsearch-common.conf.j2" %}
-{% include  "snippets/output.elasticsearch-" + logstash_aws_account_name + ".conf.j2" ignore missing %}
+{% include  "snippets/output.elasticsearch-" + project_name + ".conf.j2" ignore missing %}
 
 # Catch all cats :-)
   else {
