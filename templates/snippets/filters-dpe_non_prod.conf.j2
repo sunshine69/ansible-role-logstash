@@ -1,0 +1,140 @@
+  if [type] == "http" and [filename] =~ /^rds\// {
+    mutate {
+      replace => { "type" => "postgresql-error" }
+    }
+    mutate {
+      remove_field => [ "headers" ]
+    }
+  }
+
+  if [type] == "http" and [filename] =~ /^e?lb\// {
+    mutate {
+      replace => { "type" => "lb-access" }
+    }
+    mutate {
+      remove_field => [ "headers" ]
+    }
+  }
+
+  if [type] == "postgresql-error" {
+    grok {
+      match => {
+        # rds/vpc-30-int-gis-rds-master_error/postgresql.log.2017-06-08-04
+        "filename" => "rds/(?<host>vpc-%{INT}-(?<environment>[^-]*)-(?<application>[^-]*)-rds-[^_]*)_error"
+      }
+      overwrite => [ "host" ]
+    }
+
+    grok {
+      match => {
+        # rds/vpc-10-central-non-prod-payment-gwy-rds-master_error/postgresql.log.2017-09-18-05
+        # rds/vpc-10-central-non-prod-dpe-data-dictionary-rds-master_error/postgresql.log.2017-09-19-00
+        "filename" => "rds/(?<host>vpc-%{INT}-(?<environment>central-non-prod|central-prod)-(?<application>payment-gwy|dpe-data-dictionary)-rds-[^_]*)_error"
+      }
+      overwrite => [ "host" ]
+    }
+
+    grok {
+      break_on_match => true
+      match => {
+        "message" => [
+          # duration: 845.558 ms  execute S_4: SELECT pp.cadastre_intersect($1,$2,$3)
+          "%{POSTGRESQL_COMMON}(?<message>duration:\s+%{NUMBER:duration:float}\s+ms\s+%{WORD:operation}\s+(?<statement_id>[^:]*):\s+%{GREEDYDATA:statement})",
+          "%{POSTGRESQL_COMMON}%{GREEDYDATA:message}" # default fallback pattern
+        ]
+      }
+      patterns_dir => [ "./patterns", "/etc/logstash/patterns" ]
+      remove_tag => [ "_grokparsefailure" ]
+      overwrite => [ "message" ]
+    }
+    date {
+      match => [ "timestamp", "yyyy-MM-dd HH:mm:ss ZZZ" ]
+    }
+  }
+
+  if [type] == "qgis-application" {
+    # [15769][14:16:47] inserting pair HEIGHT // 270 into the parameter map
+    grok {
+      match => {
+        message => "\[%{NUMBER:pid:int}\]\[%{TIME:timestamp}\]\s%{GREEDYDATA:message}"
+      }
+      overwrite => [ "message" ]
+      remove_tag => [ "_grokparsefailure" ]
+    }
+    date {
+      match => [ "timestamp", "HH:mm:ss" ]
+    }
+  }
+
+  if [type] == "weave-application" {
+    grok {
+      break_on_match => false
+      match => { "message" => "%{TIMESTAMP_ISO8601:timestamp} (?<status>[^\s]+) \[(?<component>[^\[\]]+)\]\s+(?<java_class>[^\s]+)\s+(?<msg>.*)" }
+      remove_tag => [ "_grokparsefailure" ]
+      match => { "msg" => "\s+on\s+(?<method>[^\s]+)\s+when executing SQL (?<sql_stmt>[^\"]+)" }
+    }
+    date {
+      match => [ "timestamp", "ISO8601" ]
+    }
+  }
+
+  if [type] == "apache-access" or [type] == "qgis-access" {
+    grok {
+      match => { "message" => "%{COMBINEDAPACHELOG}" }
+      remove_tag => [ "_grokparsefailure" ]
+    }
+    date {
+      match => [ "timestamp", "dd/MMM/yyyy:HH:mm:ss Z" ]
+    }
+  }
+
+  if [type] == "drupal-error" {
+    grok {
+      break_on_match => true
+      match => {
+        "message" => [
+           "\[(?<timestamp>%{DAY} %{MONTH} %{MONTHDAY} %{TIME} %{YEAR})\]\s\[%{WORD:process}:error\]\s\[pid\s%{NUMBER:pid:int}:tid\s%{NUMBER:tid:int}\]\s\[client\s%{IPORHOST:clienthost}:%{NUMBER:clientport:int}\]\s%{WORD:php_error_code}:\s+%{GREEDYDATA:php_error_msg}",
+           "\[(?<timestamp>%{DAY} %{MONTH} %{MONTHDAY} %{TIME} %{YEAR})\]\s\[%{WORD:process}:error\]\s\[pid\s%{NUMBER:pid:int}:tid\s%{NUMBER:tid:int}\]\s\(%{NUMBER:proxy_error_code:int}\)(?<proxy_error_msg>[^:]*):\s%{WORD:php_error_code}:\s+%{GREEDYDATA:php_error_msg}"
+        ]
+      }
+      remove_tag => [ "_grokparsefailure" ]
+    }
+    date {
+      match => [ "timestamp", "EEE MMM dd HH:mm:ss.SSSSSS yyyy" ]
+    }
+  }
+
+  if [type] == "drupal-access" {
+    grok {
+      break_on_match => false
+      match => { "message" => "%{IPORHOST:clientip} %{HTTPDUSER:ident} %{HTTPDUSER:auth} \[%{HTTPDATE:timestamp}\] \"(?:%{WORD:method} %{NOTSPACE:request}(?: HTTP/%{NUMBER:httpversion})?|%{DATA:rawrequest})\" %{NUMBER:status:int} (?:%{NUMBER:bytes:int}|-) %{NUMBER:responsetime:int} \"(?<referrer>[^\"]*)\" \"(?<agent>[^\"]*)\"" }
+      remove_tag => [ "_grokparsefailure" ]
+    }
+    date {
+      match => [ "timestamp", "dd/MMM/yyyy:HH:mm:ss Z" ]
+    }
+  }
+
+  if [type] == "weave-access" {
+    grok {
+      break_on_match => false
+      match => { "message" => "%{IPORHOST:clientip} %{HTTPDUSER:ident} %{HTTPDUSER:auth} \[%{HTTPDATE:timestamp}\] \"(?:%{WORD:method} %{NOTSPACE:request}(?: HTTP/%{NUMBER:httpversion})?|%{DATA:rawrequest})\" %{NUMBER:status} (?:%{NUMBER:bytes}|-) %{NUMBER:responsetime}" }
+      remove_tag => [ "_grokparsefailure" ]
+    }
+    date {
+      match => [ "timestamp", "dd/MMM/yyyy:HH:mm:ss Z" ]
+    }
+  }
+
+  # Payment service logger format: remote-client - - [timestamp] "method uri version" status content-length "referrer" "user-agent"
+  # Payment service date format example: Tue, 05 Sep 2017 17:37:53 GMT
+  if [type] == "logback" {
+    grok {
+      match => { "message" => "%{IPORHOST:clientip} %{HTTPDUSER:ident} %{HTTPDUSER:auth} \[(?<timestamp>%{DAY}, %{MONTHDAY} %{MONTH} %{YEAR} %{TIME} %{WORD})\] \"(?:%{WORD:method} %{NOTSPACE:request}(?: HTTP/%{NUMBER:httpversion})?|%{DATA:rawrequest})\" %{NUMBER:status:int} (?:%{NUMBER:bytes:int}|-) \"(?<referrer>[^\"]*)\" \"(?<agent>[^\"]*)\"" }
+      remove_tag => [ "_grokparsefailure" ]
+    }
+    date {
+      match => [ "timestamp", "EEE, dd MMM yyyy HH:mm:ss ZZZ" ]
+    }
+  }
+

@@ -4,7 +4,7 @@
   # indices and maybe - optimization strategies for your new indices.
   # elasticsearch-lambda-handler-dpe-eplanning.py in template folder.
 
-  if [type] == "drupal-error" {
+  else if [type] == "drupal-error" {
     elasticsearch {
       hosts => ["{{ elasticsearch_endpoint }}"]
       index => "%{environment}-drupal-error-%{+YYYY.MM.dd}"
@@ -15,34 +15,6 @@
     elasticsearch {
       hosts => ["{{ elasticsearch_endpoint }}"]
       index => "%{environment}-cloudwatch-%{+YYYY.MM.dd}"
-    }
-  }
-
-  else if [type] == "cloudfront" {
-    elasticsearch {
-      hosts => ["{{ elasticsearch_endpoint }}"]
-      index => "%{environment}-cloudfront-%{+YYYY.MM.dd}"
-    }
-  }
-
-  else if [type] == "cloudtrail" {
-    elasticsearch {
-      hosts => ["{{ elasticsearch_endpoint }}"]
-      index => "cloudtrail-%{+YYYY.MM.dd}"
-    }
-  }
-
-  else if [type] == "syslog" and [environment] {
-    elasticsearch {
-      hosts => ["{{ elasticsearch_endpoint }}"]
-      index => "%{environment}-syslog-%{+YYYY.MM.dd}"
-    }
-  }
-
-  else if [type] == "syslog" and ![environment] {
-    elasticsearch {
-      hosts => ["{{ elasticsearch_endpoint }}"]
-      index => "unknown-%{+YYYY.MM.dd}"
     }
   }
 
@@ -81,13 +53,6 @@
     }
   }
 
-  else if [type] == "lb-access" {
-    elasticsearch {
-      hosts => ["{{ elasticsearch_endpoint }}"]
-      index => "%{environment}-%{application}-lb-access-%{+YYYY.MM.dd}"
-    }
-  }
-
   else if [type] == "qgis-error" {
     elasticsearch {
       hosts => ["{{ elasticsearch_endpoint }}"]
@@ -109,24 +74,9 @@
     }
   }
 
-  else if [type] == "http" {
-    # explicitly declare http to be unknown - anything going here should
-    # be parsed above and log type set.
-    elasticsearch {
-      hosts => ["{{ elasticsearch_endpoint }}"]
-      index => "unknown-%{+YYYY.MM.dd}"
-    }
-  }
-
 # Save as raw logfile
 #  file {
 #        path => "/logstash-savelog/logstash-save-%{+YYYY-MM-dd}.txt"
 #        codec => line { format => "%{message}"}
 #  }
 
-  else {
-      elasticsearch {
-        hosts => ["{{ elasticsearch_endpoint }}"]
-        index    => "unknown-%{+YYYY.MM.dd}"
-    }
-  }

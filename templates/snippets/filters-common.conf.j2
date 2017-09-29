@@ -1,0 +1,106 @@
+  if [type] == "http" and [filename] =~ /^cloudfront\// {
+    mutate {
+      replace => { "type" => "cloudfront" }
+    }
+    mutate {
+      remove_field => [ "headers" ]
+    }
+  }
+
+  if [type] == "http" and [headers][content_type] == "application/cloudtrail" {
+    mutate {
+      replace => { "type" => "cloudtrail" }
+    }
+    mutate {
+      remove_field => [ "headers" ]
+    }
+  }
+
+  # fix ApiVersion field for elastic search output
+  if [apiVersion] {
+    mutate {
+      gsub => [ "apiVersion", "_", "-" ]
+    }
+  }
+
+
+  #######################################################################
+  # CONDITIONAL GROK PATTERNS ONLY BELOW HERE
+  #######################################################################
+
+  if [type] == "syslog" {
+    grok {
+      match => { "message" => "%{SYSLOGTIMESTAMP:timestamp} %{SYSLOGHOST:syslog_hostname} %{DATA:syslog_program}(?:\[%{POSINT:syslog_pid}\])?: %{GREEDYDATA:syslog_message}" }
+      remove_tag => [ "_grokparsefailure" ]
+      add_field => [ "received_at", "%{@timestamp}" ]
+      add_field => [ "received_from", "%{host}" ]
+    }
+
+    syslog_pri { }
+
+    date {
+      match => [ "timestamp", "MMM  d HH:mm:ss", "MMM dd HH:mm:ss" ]
+    }
+  }
+
+  if [type] == "cloudtrail" or [type] == "cloudwatch" {
+    mutate {
+      remove_tag => [ "_grokparsefailure" ]
+    }
+  }
+
+  if [type] == "lb-access" {
+    grok {
+      match => {
+        "filename" => "lb/(?<environment>[^/]*)/(?<application>[^/]*)/"
+      }
+    }
+
+    grok {
+      # http://docs.aws.amazon.com/elasticloadbalancing/latest/classic/access-log-collection.html
+      # Part based on https://github.com/logstash-plugins/logstash-patterns-core/pull/104
+      # with corrections to TCP logging
+      #
+      break_on_match => true
+      match => {
+        "message" => [
+          "%{ALB_ACCESS_LOG}",
+          "%{ELB_ACCESS_LOG}"
+        ]
+      }
+      patterns_dir => [ "./patterns", "/etc/logstash/patterns" ]
+      remove_tag => [ "_grokparsefailure" ]
+    }
+    date {
+      match => [ "timestamp", "ISO8601" ]
+    }
+  }
+
+  if [type] == "cloudfront" {
+    grok {
+      match => {
+        "filename" => "cloudfront/(?<environment>[^/]*)/"
+      }
+    }
+    if [message] =~ /^#/ {
+      drop { }
+    }
+    grok {
+      match => {
+        # Use v2 as it unquotes the agent field
+        "message" => "%{CLOUDFRONT_ACCESS_LOG_v2}"
+      }
+      patterns_dir => [ "./patterns", "/etc/logstash/patterns" ]
+      remove_tag => [ "_grokparsefailure" ]
+    }
+    date {
+      match => [ "timestamp", "YYYY-MM-dd	HH:mm:ss" ]
+      timezone => "UTC"
+    }
+  }
+
+  # ignore all health check calls
+  if [agent] =~ /^ELB-HealthChecker/ or [agent] =~ /^runscope-remote-radar/ {
+    drop { }
+  }
+
