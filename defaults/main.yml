@@ -1,4 +1,5 @@
----
+# the project_name that has special logstash filters and output snippets. See templates folder for more infor.
+project_name: ""
 # deployment_type: <docker|deb> Use docker or install from deb files.
 deployment_type: "deb"
 docker_log_max_file_size: "500m"

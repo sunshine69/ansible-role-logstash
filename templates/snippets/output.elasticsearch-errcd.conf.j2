@@ -1,0 +1,14 @@
+  else if [type] == "iislog" {
+    elasticsearch {
+      hosts => ["{{ elasticsearch_endpoint }}"]
+      index => "iislog-%{+YYYY.MM.dd}"
+    }
+  }
+
+  else if [type] == "wineventlog" {
+    elasticsearch {
+      hosts => ["{{ elasticsearch_endpoint }}"]
+      index => "wineventlog-%{+YYYY.MM.dd}"
+    }
+  }
+

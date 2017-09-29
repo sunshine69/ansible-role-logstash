@@ -1,0 +1,8 @@
+  if [type] == "http" and [filename] =~ /^e?lb\// {
+    mutate {
+      replace => { "type" => "lb-access" }
+    }
+    mutate {
+      remove_field => [ "headers" ]
+    }
+  }

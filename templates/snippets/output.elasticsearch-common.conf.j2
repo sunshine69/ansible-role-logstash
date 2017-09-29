@@ -1,0 +1,51 @@
+  if [type] == "cloudfront" {
+    elasticsearch {
+      hosts => ["{{ elasticsearch_endpoint }}"]
+      index => "%{environment}-cloudfront-%{+YYYY.MM.dd}"
+    }
+  }
+
+  else if [type] == "cloudtrail" {
+    elasticsearch {
+      hosts => ["{{ elasticsearch_endpoint }}"]
+      index => "cloudtrail-%{+YYYY.MM.dd}"
+    }
+  }
+
+  else if [type] == "syslog" and [environment] {
+    elasticsearch {
+      hosts => ["{{ elasticsearch_endpoint }}"]
+      index => "%{environment}-syslog-%{+YYYY.MM.dd}"
+    }
+  }
+
+  else if [type] == "syslog" and ![environment] {
+    elasticsearch {
+      hosts => ["{{ elasticsearch_endpoint }}"]
+      index => "unknown-%{+YYYY.MM.dd}"
+    }
+  }
+
+  else if [type] == "lb-access" {
+    elasticsearch {
+      hosts => ["{{ elasticsearch_endpoint }}"]
+      index => "%{environment}-%{application}-lb-access-%{+YYYY.MM.dd}"
+    }
+  }
+
+  else if [type] == "http" {
+    # explicitly declare http to be unknown - anything going here should
+    # be parsed above and log type set.
+    elasticsearch {
+      hosts => ["{{ elasticsearch_endpoint }}"]
+      index => "unknown-%{+YYYY.MM.dd}"
+    }
+  }
+
+  else if [type] == "cloudwatch" {
+    elasticsearch {
+      hosts => ["{{ elasticsearch_endpoint }}"]
+      index => "%{environment}-cloudwatch-%{+YYYY.MM.dd}"
+    }
+  }
+
