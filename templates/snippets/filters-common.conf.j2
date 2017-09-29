@@ -7,6 +7,15 @@
     }
   }
 
+  if [type] == "http" and [filename] =~ /^e?lb\// {
+    mutate {
+      replace => { "type" => "lb-access" }
+    }
+    mutate {
+      remove_field => [ "headers" ]
+    }
+  }
+
   if [type] == "http" and [headers][content_type] == "application/cloudtrail" {
     mutate {
       replace => { "type" => "cloudtrail" }

@@ -3,5 +3,6 @@
     codec => rubydebug
   }
   file {
-    path => "./output/logstash.out"
+    path => "./output/logstash.out-%{+YYYY-MM-dd}.txt"
+    codec => line { format => "%{message}"}
   }

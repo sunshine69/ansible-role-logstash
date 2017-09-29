@@ -42,3 +42,10 @@
     }
   }
 
+  else if [type] == "cloudwatch" {
+    elasticsearch {
+      hosts => ["{{ elasticsearch_endpoint }}"]
+      index => "%{environment}-cloudwatch-%{+YYYY.MM.dd}"
+    }
+  }
+

@@ -11,13 +11,6 @@
     }
   }
 
-  else if [type] == "cloudwatch" {
-    elasticsearch {
-      hosts => ["{{ elasticsearch_endpoint }}"]
-      index => "%{environment}-cloudwatch-%{+YYYY.MM.dd}"
-    }
-  }
-
   else if [type] == "postgresql-error" {
     elasticsearch {
       hosts => ["{{ elasticsearch_endpoint }}"]
@@ -73,10 +66,4 @@
       index => "%{environment}-weave-application-%{+YYYY.MM.dd}"
     }
   }
-
-# Save as raw logfile
-#  file {
-#        path => "/logstash-savelog/logstash-save-%{+YYYY-MM-dd}.txt"
-#        codec => line { format => "%{message}"}
-#  }
 
