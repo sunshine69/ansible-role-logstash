@@ -17,8 +17,9 @@
 
     ssl => true
     ssl_certificate => "{{ logstash_ssl_certificate.path }}"
+{% if logstash_ssl_certificate_authorities is defined and logstash_ssl_certificate_authorities.path %}
     ssl_certificate_authorities => "{{ logstash_ssl_certificate_authorities.path }}"
-
+{% endif %}
 # Logstash accept pkcs8 private key format with pass phrase (no where in LG doco says so)
 # The DevOps CA tools generate the key in standard openssl (pkcs1) pem format
 # Thus we need to convert using the command
