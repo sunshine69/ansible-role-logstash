@@ -67,3 +67,10 @@
     }
   }
 
+  else if [type] == "logback" {
+    elasticsearch {
+      hosts => ["{{ elasticsearch_endpoint }}"]
+      index => "json-logback-%{+YYYY.MM.dd}"
+    }
+  }
+
