@@ -29,6 +29,10 @@
     ssl_key => "{{ logstash_ssl_key.path }}"
     ssl_verify_mode => "{{ logstash_beat_ssl_verify_mode }}"
 
+{% if logstash_ssl_key.passphrase|default() %}
+    ssl_key_passphrase => "{{ logstash_ssl_key.passphrase }}"
+{% endif %}
+
     codec => multiline {
               pattern => "^[\s]+"
               #negate => true
