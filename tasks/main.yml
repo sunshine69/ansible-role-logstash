@@ -4,8 +4,8 @@
 - block:
     - name: Install elastic apt source
       copy:
-        content: "deb https://artifacts.elastic.co/packages/5.x/apt stable main"
-        dest: /etc/apt/sources.list.d/elastic-5.x.list
+        content: "deb https://artifacts.elastic.co/packages/{{ logstash_ver }}.x/apt stable main"
+        dest: /etc/apt/sources.list.d/elastic-{{ logstash_ver }}.x.list
 
     - name: Install NewRelic APT keys
       apt_key:
