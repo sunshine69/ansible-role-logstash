@@ -10,9 +10,9 @@
               #negate => true
               what => "previous"
             }
+{% endif %}
   }
 
-{% endif %}
 
   beats {
     port => {{ filebeat_ssl_port }}
@@ -41,5 +41,5 @@
               #negate => true
               what => "previous"
             }
-  }
 {% endif %}
+  }
