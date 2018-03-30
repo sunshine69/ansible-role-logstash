@@ -24,6 +24,12 @@
       args:
         creates: "/usr/share/logstash/vendor/bundle/jruby/1.9/gems/{{ item.name }}-{{ item.version }}"
       with_items: "{{ logstash_plugins }}"
+      when: not item.install_from_gem_file|default()
+
+    - name: Install logstash plugins
+      command: "/usr/share/logstash/bin/logstash-plugin install {{ item.url }}"
+      with_items: "{{ logstash_plugins }}"
+      when: item.install_from_gem_file|default()
 
     - name: set logstash user and group facts
       set_fact:
