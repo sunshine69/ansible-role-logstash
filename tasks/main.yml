@@ -94,6 +94,7 @@
     backup: no
     owner: "{{ logstash_user|default(omit) }}"
     group: "{{ logstash_group|default(omit) }}"
+    mode: "0600"
   notify: reload logstash
   register: logstash_conf
 
