@@ -55,3 +55,4 @@
 
   connection: local
   become: no
+  when: logstash_create_route53|default()

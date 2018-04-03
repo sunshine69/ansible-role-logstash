@@ -1,0 +1,80 @@
+---
+- name: Bring up docker container
+  hosts: localhost
+  gather_facts: false
+  vars:
+    ct_name: test_role_logstash
+    ct_image: "ubuntu:16.04"
+    ct_command: "sleep infinity"
+
+  tags:
+    - test
+    - launch_container
+
+  tasks:
+    - docker_container:
+        name: "{{ ct_name }}"
+        hostname: "{{ ct_name }}"
+        image: "{{ ct_image }}"
+        volumes: ".:/workdir"
+        # this optin always recreate ct - is it a bug?
+        # working_dir: "/workdir"
+        command: "{{ ct_command }}"
+        state: started
+        recreate: no
+    - add_host:
+        name: "{{ ct_name }}"
+
+- hosts: test_role_logstash
+  remote_user: root
+  connection: docker
+  gather_facts: no
+  tags:
+    - test
+    - install_base
+  tasks:
+    - raw: "apt update && apt -y install python unzip zip bzip2 curl apt-transport-https"
+
+- hosts: test_role_logstash
+  remote_user: root
+  connection: docker
+  tags:
+    - test
+    - test_role
+  vars:
+    ubuntu_version_codename: xenial
+  roles:
+    - logstash
+
+  post_tasks:
+    - shell: >
+        if which logstash 2>/dev/null; then
+          logstash_cmd="$(which logstash)"
+        elif [ -x /usr/share/logstash/bin/logstash ] ; then
+          logstash_cmd="/usr/share/logstash/bin/logstash"
+        fi
+        logstash_path="--logstash-path $logstash_cmd"
+        echo $logstash_path
+      register: detect_logstash_path
+
+    - set_fact:
+        logstash_path: "{{ detect_logstash_path.stdout }}"
+
+    - include_tasks: filter_test_docker.yml
+    - include_tasks: http_test_docker.yml
+
+- name: Shutdown docker container
+  hosts: localhost
+  gather_facts: false
+  vars:
+    ct_name: test_role_logstash
+  tags:
+    - destroy_container
+
+  tasks:
+    - pause:
+        prompt: "Shuttdown container then continue otherwise abort"
+
+    - docker_container:
+        name: "{{ ct_name }}"
+        state: absent
