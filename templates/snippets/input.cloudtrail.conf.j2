@@ -43,14 +43,3 @@
     add_field => { "environment" => "{{ _env }}" }
   }
 {% endfor %}
-
-# quickly added here
-  cloudwatch_logs {
-        log_group => [ "/aws/lambda/", "/aws/ecs" ]
-        log_group_prefix => true
-        region => "{{ region }}"
-
-        #access_key_id => ""
-        #secret_access_key => ""
-  }
-

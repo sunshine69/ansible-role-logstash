@@ -1,11 +1,13 @@
-- include: get_aws_elasticsearch_endpoint.yml
-- include: create_logstash_route53_zone.yml
+- include_tasks: get_aws_elasticsearch_endpoint.yml
+  tags: get_aws_elasticsearch_endpoint
+
+- include_tasks: create_logstash_route53_zone.yml
 
 - block:
     - name: Install elastic apt source
       copy:
-        content: "deb https://artifacts.elastic.co/packages/{{ logstash_ver }}.x/apt stable main"
-        dest: /etc/apt/sources.list.d/elastic-{{ logstash_ver }}.x.list
+        content: "deb https://artifacts.elastic.co/packages/{{ logstash_version }}.x/apt stable main"
+        dest: /etc/apt/sources.list.d/elastic-{{ logstash_version }}.x.list
 
     - name: Install NewRelic APT keys
       apt_key:
@@ -13,23 +15,16 @@
         url: https://artifacts.elastic.co/GPG-KEY-elasticsearch
         state: present
 
-    - name: Install logstash {{logstash_ver}}
+    - name: Install logstash {{logstash_version}}
       apt:
         name: "logstash"
         state: "present"
         update_cache: yes
 
-    - name: Install logstash plugins
-      command: "/usr/share/logstash/bin/logstash-plugin install --version {{ item.version }} {{ item.name }}"
-      args:
-        creates: "/usr/share/logstash/vendor/bundle/jruby/1.9/gems/{{ item.name }}-{{ item.version }}"
+    - include_tasks: install-logstash-plugins.yml
       with_items: "{{ logstash_plugins }}"
-      when: not item.install_from_gem_file|default()
-
-    - name: Install logstash plugins
-      command: "/usr/share/logstash/bin/logstash-plugin install {{ item.url }}"
-      with_items: "{{ logstash_plugins }}"
-      when: item.install_from_gem_file|default()
+      loop_control:
+        loop_var: logstash_plugin_item
 
     - name: set logstash user and group facts
       set_fact:
@@ -54,12 +49,14 @@
       notify:
         - reload systemd
         - restart logstash
+      tags: systemd-required
 
     - name: Enable logstash service
       service:
         name: logstash
         enabled: yes
         state: started
+      tags: systemd-required
 
   when: deployment_type == "deb"
 
@@ -142,7 +139,7 @@
 - block:
     - pip: name=docker-py state=present
 
-    - name: Install logstash {{logstash_ver}}
+    - name: Install logstash {{logstash_version}}
       apt:
         name: "logstash"
         state: "absent"

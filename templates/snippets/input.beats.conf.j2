@@ -4,7 +4,7 @@
 
     ssl => false
 
-{% if logstash_ver == 5 %}
+{% if logstash_versionsion == 5 %}
     codec => multiline {
               pattern => "^[\s]+"
               #negate => true
@@ -35,7 +35,7 @@
 {% if logstash_ssl_key.passphrase|default() %}
     ssl_key_passphrase => "{{ logstash_ssl_key.passphrase }}"
 {% endif %}
-{% if logstash_ver == 5 %}
+{% if logstash_versionsion == 5 %}
     codec => multiline {
               pattern => "^[\s]+"
               #negate => true

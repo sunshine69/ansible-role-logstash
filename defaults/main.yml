@@ -8,9 +8,7 @@ docker_log_max_file_count: 5
 force_image_build: "no"
 logstash_image_name: "xvt-logstash"
 
-# Elasticsearch URL for logstash output
-es_url: "<To be supplied in inventory>"
-logstash_ver: "6"
+logstash_version: "6"
 
 logstash_docker_exposed_ports:
   - "{{ filebeat_port }}:{{ filebeat_port }}"
