@@ -2,6 +2,7 @@
   command: "/usr/share/logstash/bin/logstash-plugin list --verbose"
   register: current_logstash_plugin_list
   when: not current_logstash_plugin_list|default()
+  changed_when: false
 
 - name: Setfact installed_logstash_plugin_list
   set_fact:

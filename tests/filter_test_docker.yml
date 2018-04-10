@@ -25,6 +25,7 @@
   with_fileglob: "{{ filter|default('*') }}.json"
   register: test_results
   ignore_errors: yes
+  changed_when: false
 
 - name: pretty print any failing test and then fail
   debug:
