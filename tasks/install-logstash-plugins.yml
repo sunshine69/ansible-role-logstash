@@ -1,0 +1,14 @@
+- name: Detect plugin {{ logstash_plugin_item.name }} with version {{ logstash_plugin_item.version }}
+  set_fact:
+    logstash_detect_plugin: "{{ (logstash_plugin_item.name + ' (' + logstash_plugin_item.version + ')') in current_logstash_plugin_list.stdout_lines }}"
+
+- block:
+    - name: Install logstash plugins {{ logstash_plugin_item.name }} {{ logstash_plugin_item.version }}
+      command: "/usr/share/logstash/bin/logstash-plugin install --version {{ logstash_plugin_item.version }} {{ logstash_plugin_item.name }}"
+      when: not logstash_plugin_item.install_from_gem_file|default()
+
+    - name: Install logstash plugins {{ logstash_plugin_item.url }}
+      command: "/usr/share/logstash/bin/logstash-plugin install {{ logstash_plugin_item.url }}"
+      when: logstash_plugin_item.install_from_gem_file|default()
+
+  when: not logstash_detect_plugin

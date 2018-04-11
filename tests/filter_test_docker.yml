@@ -1,0 +1,35 @@
+- name: create filters configuration file
+  template:
+    src: "../templates/snippets/filters.conf.j2"
+    dest: "{{ test_data_dir }}/filters.conf"
+
+- name: ensure patterns directory exists
+  file:
+    state: directory
+    path: patterns
+
+- name: put patterns into place
+  copy:
+    src: "{{ playbook_dir }}/../files/patterns"
+    dest: "{{ test_data_dir }}"
+
+- name: Install logstash-filter-verifier_1.4.1_amd64.deb
+  apt:
+    deb: "http://xvt-public-repo.s3.amazonaws.com/pub/logstash-filter-verifier_1.4.1_amd64.deb"
+    state: present
+
+- name: run logstash-filter-verifier
+  command: "logstash-filter-verifier --logstash-path {{ logstash_path }} ../{{ item|basename }} ./filters.conf"
+  args:
+    chdir: "{{ test_data_dir }}"
+  with_fileglob: "{{ filter|default('*') }}.json"
+  register: test_results
+  ignore_errors: yes
+  changed_when: false
+
+- name: pretty print any failing test and then fail
+  debug:
+    var: item.stderr_lines
+  with_items: "{{ test_results.results }}"
+  when: item.failed|default(False)
+  failed_when: item.failed|default(False)

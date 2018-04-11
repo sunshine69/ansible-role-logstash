@@ -1,4 +1,4 @@
-FROM logstash:{{logstash_ver}}
+FROM logstash:{{logstash_version}}
 
 # Install plugins
 {% for plugin in logstash_plugins %}

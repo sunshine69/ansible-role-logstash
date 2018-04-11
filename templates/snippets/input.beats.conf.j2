@@ -4,12 +4,15 @@
 
     ssl => false
 
+{% if logstash_versionsion == 5 %}
     codec => multiline {
               pattern => "^[\s]+"
               #negate => true
               what => "previous"
             }
+{% endif %}
   }
+
 
   beats {
     port => {{ filebeat_ssl_port }}
@@ -29,9 +32,14 @@
     ssl_key => "{{ logstash_ssl_key.path }}"
     ssl_verify_mode => "{{ logstash_beat_ssl_verify_mode }}"
 
+{% if logstash_ssl_key.passphrase|default() %}
+    ssl_key_passphrase => "{{ logstash_ssl_key.passphrase }}"
+{% endif %}
+{% if logstash_versionsion == 5 %}
     codec => multiline {
               pattern => "^[\s]+"
               #negate => true
               what => "previous"
             }
+{% endif %}
   }

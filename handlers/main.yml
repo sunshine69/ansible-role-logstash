@@ -5,13 +5,16 @@
 
 - name: reload systemd
   command: systemctl daemon-reload
+  tags: systemd-required
 
 - name: reload logstash
   command: pkill -U logstash -HUP -f /etc/logstash
   when: deployment_type == "deb"
+  tags: systemd-required
 
 - name: restart logstash
   service:
     name: logstash
     state: restarted
   when: deployment_type == "deb"
+  tags: systemd-required

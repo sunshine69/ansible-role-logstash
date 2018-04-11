@@ -1,0 +1,113 @@
+- name: Bring up docker container
+  hosts: localhost
+  gather_facts: false
+  vars:
+    ct_name: test_role_logstash
+    ct_image: "ubuntu:16.04"
+    ct_command: "sleep infinity"
+    work_dir: "/workdir"
+
+  tags:
+    - test
+    - launch_container
+
+  tasks:
+    - docker_container:
+        name: "{{ ct_name }}"
+        hostname: "{{ ct_name }}"
+        image: "{{ ct_image }}"
+        volumes: ".:{{ work_dir }}"
+        # this optin always recreate ct - is it a bug?
+        # working_dir: "/workdir"
+        command: "{{ ct_command }}"
+        state: started
+        recreate: no
+    - add_host:
+        name: "{{ ct_name }}"
+
+- hosts: test_role_logstash
+  remote_user: root
+  connection: docker
+  gather_facts: no
+  tags:
+    - test
+    - install_base
+  tasks:
+    - raw: "apt update && apt -y install python unzip zip bzip2 curl apt-transport-https"
+
+- hosts: test_role_logstash
+  remote_user: root
+  connection: docker
+  tags:
+    - test
+    - test_role
+  vars:
+    ubuntu_version_codename: xenial
+    work_dir: "/workdir"
+    test_data_dir: "{{ work_dir }}/test-data"
+
+    logstash_plugins:
+      - name: "logstash-input-cloudwatch"
+        version: "2.0.3"
+      - name: "logstash-output-newrelic"
+        version: "0.9.1"
+      - name: "logstash-codec-cloudtrail"
+        version: "3.0.0"
+      - name: "logstash-input-cloudwatch_logs"
+        version: "1.0.2"
+        url: https://s3-ap-southeast-2.amazonaws.com/xvt-public-repo/pub/logstash-input-cloudwatch_logs-1.0.2.zip
+        install_from_gem_file: yes
+
+    central_name: central-non-prod
+    logstash_node_name: process_beat
+
+    logstash_nodes:
+      central-non-prod:
+        process_beat:
+        name: process_beat
+        ec2_instance_type: "t2.small"
+        enable_http_input: True
+        enable_beat_input: True
+        enable_logback_input: True
+        enable_cloudtrail_input: True
+        enable_cloudwatch_input: True
+
+  roles:
+    - logstash
+
+  post_tasks:
+    - shell: |
+        if which logstash 2>/dev/null; then
+          logstash_cmd="$(which logstash)"
+        elif [ -x /usr/share/logstash/bin/logstash ] ; then
+          logstash_cmd="/usr/share/logstash/bin/logstash"
+        fi
+        echo "$logstash_cmd"
+      register: detect_logstash_path
+
+    - set_fact:
+        logstash_path: "{{ detect_logstash_path.stdout }}"
+
+    - name: Make sure test_data_dir exists
+      file:
+        path: "{{ test_data_dir }}"
+        state: directory
+
+    - include_tasks: filter_test_docker.yml
+    - include_tasks: http_test_docker.yml
+
+- name: Shutdown docker container
+  hosts: localhost
+  gather_facts: false
+  vars:
+    ct_name: test_role_logstash
+  tags:
+    - destroy_container
+
+  tasks:
+    - pause:
+        prompt: "Shuttdown container then continue otherwise abort"
+
+    - docker_container:
+        name: "{{ ct_name }}"
+        state: absent
