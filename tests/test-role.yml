@@ -54,6 +54,7 @@
       - name: "logstash-codec-cloudtrail"
         version: "3.0.0"
       - name: "logstash-input-cloudwatch_logs"
+        version: "1.0.2"
         url: https://s3-ap-southeast-2.amazonaws.com/xvt-public-repo/pub/logstash-input-cloudwatch_logs-1.0.2.zip
         install_from_gem_file: yes
 

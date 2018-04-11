@@ -1,31 +1,14 @@
-- name: Get the current logstash plugin list
-  command: "/usr/share/logstash/bin/logstash-plugin list --verbose"
-  register: current_logstash_plugin_list
-  when: not current_logstash_plugin_list|default()
-  changed_when: false
-
-- name: Setfact installed_logstash_plugin_list
-  set_fact:
-    installed_logstash_plugin_list: "{{ current_logstash_plugin_list.stdout }}"
-  when: current_logstash_plugin_list.stdout|default()
-
 - name: Detect plugin {{ logstash_plugin_item.name }} with version {{ logstash_plugin_item.version }}
-  shell: >
-    if echo '{{ installed_logstash_plugin_list }}' |
-      grep '{{ logstash_plugin_item.version|default("") }}' | grep '{{ logstash_plugin_item.name }}' >/dev/null 2>&1; then
-      echo yes;
-    else
-      echo no
-    fi
-  register: logstash_detect_plugin
+  set_fact:
+    logstash_detect_plugin: "{{ (logstash_plugin_item.name + ' (' + logstash_plugin_item.version + ')') in current_logstash_plugin_list.stdout_lines }}"
 
 - block:
-    - name: Install logstash plugins
+    - name: Install logstash plugins {{ logstash_plugin_item.name }} {{ logstash_plugin_item.version }}
       command: "/usr/share/logstash/bin/logstash-plugin install --version {{ logstash_plugin_item.version }} {{ logstash_plugin_item.name }}"
       when: not logstash_plugin_item.install_from_gem_file|default()
 
-    - name: Install logstash plugins
+    - name: Install logstash plugins {{ logstash_plugin_item.url }}
       command: "/usr/share/logstash/bin/logstash-plugin install {{ logstash_plugin_item.url }}"
       when: logstash_plugin_item.install_from_gem_file|default()
 
-  when: logstash_detect_plugin.stdout == 'no'
+  when: not logstash_detect_plugin
