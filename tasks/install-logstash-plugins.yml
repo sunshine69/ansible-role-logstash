@@ -26,6 +26,6 @@
 
     - name: Install logstash plugins
       command: "/usr/share/logstash/bin/logstash-plugin install {{ logstash_plugin_item.url }}"
-      with_items: "{{ logstash_plugins }}"
       when: logstash_plugin_item.install_from_gem_file|default()
+
   when: logstash_detect_plugin.stdout == 'no'
