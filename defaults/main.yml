@@ -54,3 +54,12 @@ logstash_ssl_key:
 
 # force_peer|peer|none (default)
 logstash_beat_ssl_verify_mode: none
+
+logstash_cloudwatch_inputs:
+  - log_group:
+      - "/aws/lambda/"
+      - "/aws/ecs"
+    log_group_prefix: "true"
+    region: "{{ region }}"
+    #access_key_id: ""
+    #secret_access_key: ""

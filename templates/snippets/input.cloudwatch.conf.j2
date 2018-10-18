@@ -1,7 +1,11 @@
+{%- for input_item in logstash_cloudwatch_inputs -%}
   cloudwatch_logs {
-        log_group => [ "/aws/lambda/", "/aws/ecs" ]
+        log_group => [ {%- for _groups in input_item['log_group'] -%}"{{ _groups }}"{% if not loop.last %},{%- endif -%}{%- endfor -%}]
         log_group_prefix => true
         region => "{{ region }}"
-        #access_key_id => ""
-        #secret_access_key => ""
+{%- if 'access_key_id' in input_item -%}
+        access_key_id => "{{ input_item['access_key_id'] }}"
+        secret_access_key => "{{ input_item['secret_access_key'] }}"
+{%- endif -%}
   }
+{%- endfor -%}
