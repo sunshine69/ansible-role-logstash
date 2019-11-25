@@ -134,7 +134,7 @@
         dest: "{{ item.path }}"
         owner: "{{ logstash_user|default(omit) }}"
         group: "{{ logstash_group|default(omit) }}"
-        mode: "{{ '0664' if item.path|search('/[^\\s]+\\.key$/') else '0600' }}"
+        mode: "{{ '0664' if item.path|regex_search('/[^\\s]+\\.key$/') else '0600' }}"
       with_items:
         - "{{ logstash_ssl_certificate }}"
         - "{{ logstash_ssl_certificate_authorities }}"
