@@ -1,7 +1,7 @@
 # logstash sits in central vpc
 - block:
     - name: Get the VPC facts for all VPC
-      ec2_vpc_net_facts:
+      ec2_vpc_net_info:
         region: "{{ region }}"
         profile: "{{ aws_account_name }}"
         filters:
